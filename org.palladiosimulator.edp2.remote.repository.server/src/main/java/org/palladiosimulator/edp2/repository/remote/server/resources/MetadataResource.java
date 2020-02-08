@@ -23,17 +23,21 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.jboss.resteasy.annotations.Body;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.palladiosimulator.edp2.dao.*;
 import org.palladiosimulator.edp2.dao.MeasurementsDao;
 import org.palladiosimulator.edp2.dao.MeasurementsDaoFactory;
 import org.palladiosimulator.edp2.local.LocalDirectoryRepository;
+import org.palladiosimulator.edp2.models.ExperimentData.ExperimentDataFactory;
+import org.palladiosimulator.edp2.models.ExperimentData.ExperimentGroup;
 import org.palladiosimulator.edp2.models.Repository.Repository;
 import org.palladiosimulator.edp2.remote.RemoteRepositoryAPI;
 import org.palladiosimulator.edp2.remote.dto.ExperimentGroupDTO;
@@ -55,17 +59,10 @@ public class MetadataResource implements RemoteRepositoryAPI {
 	private Map<String, RepositoryInfoDTO> repositories = new HashMap<String, RepositoryInfoDTO>();
 	private static String BASE_PATH = "D:\\Repositories\\eclipseWorkspace\\EDP2_BASE";
 
-	private static LocalDirectoryRepository localRepo;
-
+	private final static ExperimentDataFactory EXPERIMENT_DATA_FACTORY = ExperimentDataFactory.eINSTANCE;
+	
 	@Autowired
 	private RepositoriesService repoService;
-
-	@GET
-	@Path("/do")
-	public String doStuff() {
-		System.out.println("I have some stuff to do!");
-		return "{ \"stuff\" : \"do\" }";
-	}
 
 	@POST
 	@Consumes("application/json")
@@ -75,19 +72,11 @@ public class MetadataResource implements RemoteRepositoryAPI {
 
 		if (repo != null) {
 
-			System.out.println("Creating Repository");
-			System.out.println(repo);
+			String repoPath = URI.createFileURI(BASE_PATH + "\\" + repo.getId() +"\\").toString();
+			LocalDirectoryRepository localRepo = repoService.findOrInitRepository(repoPath);
 
-			// create new directory for the new Repository
-			File repoDir = new File(BASE_PATH + "\\" + repo.getName());
-
-			LocalDirectoryRepository localRepo = null;
-
-			// create repo if it does not already exist
-			if (!repoDir.exists()) {
-				localRepo = LocalDirectoryRepositoryHelper.initializeLocalDirectoryRepository(repoDir);
-
-				this.localRepo = localRepo;
+			if (localRepo == null) {
+				return Response.serverError().build();
 			}
 			return Response.created(UriBuilder.fromPath("/repository/" + localRepo.getUri()).build()).build();
 		}
@@ -103,31 +92,58 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		List<RepositoryInfoDTO> result = new ArrayList<>();
 		for (Repository repository : repos) {
 			RepositoryInfoDTO dto = new RepositoryInfoDTO();
-			dto.setName(repository.getId());
+			dto.setId(repository.getId());
 			result.add(dto);
 		}
-
 		return result;
 	}
 
-	@GET
-	@Path("/repository/{name}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getRepository(@PathParam("name") String repoName) {
-
-		RepositoryInfoDTO result = repositories.get(repoName);
-
-		if (result != null) {
-			return Response.status(200).entity(result).build();
-		} else {
-			return Response.status(404).build();
+	@POST
+	@Consumes("application/json")
+	@Produces("application/json")
+	@Path("/repository/{id}/experimentGroup")
+	public Response createExperimentGroup(@PathParam("id") String repoId, String groupName) {
+		
+		String repoPath = URI.createFileURI(BASE_PATH + "\\" + repoId + "\\").toString();
+		
+		LocalDirectoryRepository localRepo = repoService.getRepository(repoPath);
+		
+		if(localRepo != null) {			
+			ExperimentGroup newExperimentGroup = EXPERIMENT_DATA_FACTORY.createExperimentGroup();
+			
+			if(newExperimentGroup != null) {
+				newExperimentGroup.setPurpose(groupName);
+				newExperimentGroup.setRepository(localRepo);
+				
+				// create the DTO
+				ExperimentGroupDTO expGrpDTO = new ExperimentGroupDTO();
+				expGrpDTO.setUuid(newExperimentGroup.getId());
+				expGrpDTO.setPurpose(groupName);
+				
+				return Response.ok().entity(expGrpDTO).build();
+			}
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(groupName).build();
 		}
+		return Response.status(Status.NOT_ACCEPTABLE).entity(repoId).build();
 	}
-
+	
 	@GET
-	@Path("/repository/{name}/experimentGroups")
-	public List<ExperimentGroupDTO> getExperimentGroupsOfRepo(@PathParam("name") String repoName) {
-		// TODO Auto-generated method stub
+	@Path("/repository/{id}/experimentGroups")
+	public List<ExperimentGroupDTO> getExperimentGroupsOfRepo(@PathParam("id") String repoId) {
+		String repoPath = repoService.getDirPathForRepositoryId(repoId);
+		LocalDirectoryRepository localRepo = repoService.getRepository(repoPath);
+		
+		EList<ExperimentGroup> groups = localRepo.getExperimentGroups();
+		
+		
+		List<ExperimentGroupDTO> resultList = new ArrayList<ExperimentGroupDTO>();
+		
+		for (ExperimentGroup expGrp : groups) {
+			ExperimentGroupDTO dto = new ExperimentGroupDTO();
+			dto.setUuid(expGrp.getId());
+			dto.setPurpose(expGrp.getPurpose());
+		}
+		
 		return null;
 	}
 

@@ -17,10 +17,6 @@ import org.palladiosimulator.edp2.remote.dto.RepositoryInfoDTO;
 @Path("/repo")
 @Produces(MediaType.APPLICATION_JSON)
 public interface RemoteRepositoryAPI {
-
-	@GET
-	@Path("/do")
-	public String doStuff();
 	
 	@POST
 	@Consumes("application/json")
@@ -32,11 +28,6 @@ public interface RemoteRepositoryAPI {
 	@Produces("application/json")
 	@Path("/repositories")
 	public List<RepositoryInfoDTO> getAllRepositories();
-	
-	@GET
-	@Path("/repository/{name}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getRepository(@PathParam("name") String repoName);
 	
 	@GET
 	@Path("/repository/{name}/experimentGroups")

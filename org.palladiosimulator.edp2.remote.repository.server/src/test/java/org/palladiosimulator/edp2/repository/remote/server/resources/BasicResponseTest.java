@@ -7,11 +7,10 @@ import static io.restassured.RestAssured.*;
 
 import org.junit.jupiter.api.Test;
 
-class BasicResponseTest extends RepositoryTest {
+class BasicResponseTest extends BaseTest {
 
 	@Test
 	void basicPingTest() {
 		given().when().get("").then().statusCode(200);
 	}
-
 }

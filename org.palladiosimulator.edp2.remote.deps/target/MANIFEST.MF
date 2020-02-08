@@ -3,7 +3,7 @@ Automatic-Module-Name: org.palladiosimulator.edp2.remote.ide
 Bundle-ManifestVersion: 2
 Bundle-Name: org.palladiosimulator.edp2.remote.ide
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.202001301935
+Bundle-Version: 1.0.0.202002051558
 Bundle-SymbolicName: org.palladiosimulator.edp2.remote.deps;singleton:=t
  rue
 Bundle-ActivationPolicy: lazy

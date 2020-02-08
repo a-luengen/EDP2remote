@@ -6,6 +6,14 @@ public class RepositoryInfoDTO {
 	
 	private String name;
 	
+	private String id;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	private List<String> experimentGroupIds;
 	
 	public String getName() {
@@ -14,6 +22,7 @@ public class RepositoryInfoDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public List<String> getExperimentGroupIds() {
 		return experimentGroupIds;
 	}
