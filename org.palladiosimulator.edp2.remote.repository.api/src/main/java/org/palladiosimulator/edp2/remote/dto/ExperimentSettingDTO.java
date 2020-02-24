@@ -4,28 +4,28 @@ import java.util.List;
 
 public class ExperimentSettingDTO {
 
-	private String purpose;
+	private String description;
 	
-	private String uuid;
+	private String id;
 	
 	private String groupId;
 	
 	private List<String> experimentRunIds;
 
-	public String getPurpose() {
-		return purpose;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setPurpose(String purpose) {
-		this.purpose = purpose;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-	public String getUuid() {
-		return uuid;
+	public String getId() {
+		return id;
 	}
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getGroupId() {

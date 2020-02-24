@@ -7,7 +7,7 @@ public class ExperimentGroupDTO {
 	private String uuid;
 	private String purpose;
 
-	private List<String> measurementRepositoryIDs;
+	private List<String> measuringpointRepositoryIDs;
 	
 	private List<String> measuringTypeIDs;
 	
@@ -29,12 +29,12 @@ public class ExperimentGroupDTO {
 		this.purpose = purpose;
 	}
 
-	public List<String> getMeasurementRepositoryIDs() {
-		return measurementRepositoryIDs;
+	public List<String> getMeasuringpointRepositoryIDs() {
+		return measuringpointRepositoryIDs;
 	}
 
-	public void setMeasurementRepositoryIDs(List<String> measurementRepositoryIDs) {
-		this.measurementRepositoryIDs = measurementRepositoryIDs;
+	public void setMeasuringpointRepositoryIDs(List<String> measurementRepositoryIDs) {
+		this.measuringpointRepositoryIDs = measurementRepositoryIDs;
 	}
 
 	public List<String> getMeasuringTypeIDs() {
