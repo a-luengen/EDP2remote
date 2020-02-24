@@ -6,7 +6,9 @@ import static io.restassured.RestAssured.*;
 //import static org.hamcrest.Matchers.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 class BasicResponseTest extends BaseTest {
 
 	@Test
