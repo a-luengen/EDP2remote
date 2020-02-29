@@ -29,10 +29,12 @@ public class TestUUIDConverter {
 	
 	@Test
 	void converterBase64ToUuidToBase64_shouldReturnSameResult() {
-		
-		String[] base64TestExamples = { "_gJnK8VcPEeqJf7CrONiWFQ", base64 };
+		String[] base64TestExamples = { 
+				"_gJnK8VcPEeqJf7CrONiWFQ", base64, 
+				"_AiroIZMbEd6Vw8NDgVSYcg", "_BRpvcEigEd-uCvl0Z-GteQ",
+				"_lss1MEhpEd-SQI4N8E0NHA", "_JYesoEigEd-4XZQqGmj8Pg",
+				"_LCpvcEigEd-s193kEND-BA"};
 		String[] base64TestResults = new String[base64TestExamples.length];
-		
 		
 		for (int i = 0; i < base64TestResults.length; i++) {
 			String temp = UUIDConverter.getUuidFromBase64(base64TestExamples[i]);
@@ -47,16 +49,14 @@ public class TestUUIDConverter {
 	/*
 	 * Not in use-case
 	 * */
+	@Test
 	void converterUuidEndToEnd_shouldReturnSameResult() {
 		String[] uuidTestExamples = { uuid };
 		String[] uuidTestResults = new String[uuidTestExamples.length];
 		
 		for (int i = 0; i < uuidTestResults.length; i++) {
-			System.out.println(uuidTestExamples[i]);
 			String temp = UUIDConverter.getBase64FromUuid(uuidTestExamples[i]);
-			System.out.println(temp);
 			uuidTestResults[i] = UUIDConverter.getUuidFromBase64(temp);
-			System.out.println(uuidTestResults[i]);
 		}
 		
 		for (int i = 0; i < uuidTestResults.length; i++) {

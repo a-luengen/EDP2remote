@@ -27,8 +27,11 @@ public class UUIDConverter {
 	}
 	
 	public static String getUuidFromBase64(final String base64) {
-		String temp = base64.replace("_", "");
-		temp += "=";
+		String temp = "";
+		if(base64.startsWith("_")) {
+			temp = base64.substring(1, base64.length());
+		}
+		temp += "==";
 	    byte[] bytes = Base64.decodeBase64(temp.getBytes());
 	    ByteBuffer bb = ByteBuffer.wrap(bytes);
 	    UUID uuid = new UUID(bb.getLong(), bb.getLong());
