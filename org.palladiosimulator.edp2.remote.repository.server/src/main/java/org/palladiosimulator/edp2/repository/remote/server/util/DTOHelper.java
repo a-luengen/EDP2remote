@@ -3,6 +3,8 @@ package org.palladiosimulator.edp2.repository.remote.server.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.unit.SI;
+
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentGroup;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentRun;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentSetting;
@@ -10,9 +12,11 @@ import org.palladiosimulator.edp2.models.ExperimentData.Measurement;
 import org.palladiosimulator.edp2.models.ExperimentData.MeasuringType;
 import org.palladiosimulator.edp2.models.Repository.Repository;
 import org.palladiosimulator.edp2.models.measuringpoint.MeasuringPointRepository;
+import org.palladiosimulator.edp2.models.measuringpoint.StringMeasuringPoint;
 import org.palladiosimulator.edp2.remote.dto.ExperimentGroupDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentRunDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentSettingDTO;
+import org.palladiosimulator.edp2.remote.dto.MeasuringPointDTO;
 import org.palladiosimulator.edp2.remote.dto.RepositoryInfoDTO;
 import org.palladiosimulator.edp2.repository.remote.server.service.RepositoriesService;
 
@@ -85,7 +89,7 @@ public class DTOHelper {
 		
 		dto.setStartTime(run.getStartTime());
 		
-		dto.setDuration(run.getDuration().intValue(run.getDuration().getUnit()));
+		dto.setDuration(run.getDuration().intValue(SI.MILLI(SI.SECOND)));
 		
 		List<String> measurements = new ArrayList<String>();
 		for (Measurement measure : run.getMeasurement()) {
@@ -93,8 +97,12 @@ public class DTOHelper {
 		}
 		
 		//dto.setMeasurements(measurements);
-		
-		
+		return dto;
+	}
+
+	public static MeasuringPointDTO getMeasuringPointDTO(StringMeasuringPoint mp) {
+		MeasuringPointDTO dto = new MeasuringPointDTO();
+		dto.setMeasuringPointDescription(mp.getStringRepresentation());
 		return dto;
 	}
 	
