@@ -1,14 +1,7 @@
 package org.palladiosimulator.edp2.repository.remote.server.resources;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -16,41 +9,37 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.palladiosimulator.edp2.dao.*;
-import org.palladiosimulator.edp2.dao.MeasurementsDao;
 import org.palladiosimulator.edp2.dao.MeasurementsDaoFactory;
 import org.palladiosimulator.edp2.local.LocalDirectoryRepository;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentDataFactory;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentGroup;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentRun;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentSetting;
+import org.palladiosimulator.edp2.models.ExperimentData.MeasuringType;
 import org.palladiosimulator.edp2.models.Repository.Repository;
 import org.palladiosimulator.edp2.models.measuringpoint.MeasuringpointFactory;
+import org.palladiosimulator.edp2.models.measuringpoint.StringMeasuringPoint;
 import org.palladiosimulator.edp2.remote.RemoteRepositoryAPI;
+import org.palladiosimulator.edp2.remote.dto.DefaultConfigurationDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentGroupDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentRunDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentSettingDTO;
-import org.palladiosimulator.edp2.remote.dto.MeasurementDTO;
+import org.palladiosimulator.edp2.remote.dto.MeasuringPointDTO;
+import org.palladiosimulator.edp2.remote.dto.MeasuringTypeDTO;
 import org.palladiosimulator.edp2.remote.dto.RepositoryInfoDTO;
-import org.palladiosimulator.edp2.repository.local.LocalDirectoryRepositoryHelper;
-import org.palladiosimulator.edp2.repository.local.dao.FileBinaryMeasurementsDaoImpl;
 import org.palladiosimulator.edp2.repository.local.dao.LocalDirectoryMeasurementsDaoFactory;
+import org.palladiosimulator.edp2.repository.remote.server.service.DataseriesService;
 import org.palladiosimulator.edp2.repository.remote.server.service.MetaService;
 import org.palladiosimulator.edp2.repository.remote.server.service.RepositoriesService;
 import org.palladiosimulator.edp2.repository.remote.server.util.DTOHelper;
+import org.palladiosimulator.edp2.repository.remote.server.util.UUIDConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 @Component
 @Path("/meta/")
@@ -58,7 +47,6 @@ public class MetadataResource implements RemoteRepositoryAPI {
 
 	private static String BASE_PATH = "D:\\Repositories\\eclipseWorkspace\\EDP2_BASE";
 
-	private final static ExperimentDataFactory EXPERIMENT_DATA_FACTORY = ExperimentDataFactory.eINSTANCE;
 	private final static MeasuringpointFactory MEASURING_POINT_FACTORY = MeasuringpointFactory.eINSTANCE;
 	
 	@Autowired
@@ -66,6 +54,16 @@ public class MetadataResource implements RemoteRepositoryAPI {
 	
 	@Autowired
 	private MetaService metaService;
+	
+	@Autowired
+	private DataseriesService dataService;
+	
+	public MetadataResource(RepositoriesService rs, MetaService ms, DataseriesService ds) {
+		this.repoService = rs;
+		this.metaService = ms;
+		this.dataService = ds;
+	}
+	
 	
 	@POST
 	@Consumes("application/json")
@@ -109,10 +107,7 @@ public class MetadataResource implements RemoteRepositoryAPI {
 			ExperimentGroup newExperimentGroup = metaService.createExperimentGroup(localRepo, groupName);
 			
 			if(newExperimentGroup != null) {
-				
-				// create the DTO
 				ExperimentGroupDTO expGrpDTO = DTOHelper.getExperimentGroupDTO(newExperimentGroup);
-				
 				return Response.ok().entity(expGrpDTO).build();
 			}
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(groupName).build();
@@ -147,14 +142,57 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		
 		LocalDirectoryRepository repo = repoService.findRepositoryByApiId(repoId);
 		if(repo != null) {
-			for (ExperimentGroup expGrp : repo.getExperimentGroups()) {
-				if(expGrp.getId().contentEquals(expGrpId))
-					return DTOHelper.getExperimentGroupDTO(expGrp);
-			}	
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(repo, expGrpId);
+			
+			if(expGrp != null)
+				return DTOHelper.getExperimentGroupDTO(expGrp);
 		}
 		return null;
 	}
 
+	@POST
+	@Path("/repository/{repoId}/experimentGroups/{grpId}/measuringType")
+	public Response createMeasuringPoint(@PathParam("repoId") String repoId,
+			@PathParam("id") String expGrpId, MeasuringPointDTO mpDTO) {
+		
+		Repository repo = repoService.findRepositoryByApiId(repoId);
+		
+		if(repo != null) {
+			ExperimentGroup grp = metaService.getExperimentGroupFromRepository(repo, expGrpId);
+			
+			if(grp != null) {
+				StringMeasuringPoint mp = metaService.createStringMeasuringPoint(grp, mpDTO);
+				mpDTO = DTOHelper.getMeasuringPointDTO(mp);
+				
+				return Response.accepted().entity(mpDTO).build();
+			}
+		}
+		return Response.status(Status.BAD_REQUEST).build();
+	}
+	
+	@POST
+	@Path("/repository/{repoId}/experimentGroups/{grpId}/measuringType")
+	public Response createMeasuringType(@PathParam("repoId") String repoId,
+			@PathParam("id") String expGrpId, MeasuringTypeDTO mtDTO) {
+		
+		Repository repo = repoService.findRepositoryByApiId(repoId);
+		
+		if(repo != null) {
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(repo, expGrpId);
+			
+			if(expGrp != null) {
+				MeasuringType mType = metaService.createMeasuringType(expGrp, mtDTO);
+				
+				if(mType != null) {
+					return Response.accepted(mtDTO).build();
+				}
+			}
+		}
+		
+		
+		return null;
+	}
+	
 	@POST
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSetting")
 	public String createExperimentSetting(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId,
@@ -162,15 +200,12 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
 		if(localRepo != null) {
-			// get experiment group
-			ExperimentGroup expGrp = repoService.getExperimentGroupById(localRepo, expGrpId);
+			ExperimentSetting setting = metaService.createExperimentSetting(localRepo, expGrpId, newSetting);
 			
-			if(expGrp != null) {
-				ExperimentSetting setting = EXPERIMENT_DATA_FACTORY.createExperimentSetting(expGrp, newSetting.getDescription());
-				if(setting != null) {
-					return "/edp2/meta/repository/" + repoId + "/experimentGroups/" + expGrpId + "/experimentSetting/" + setting.getId();
-				}
-			}
+			if(setting != null)
+				return "/edp2/meta/repository/" + repoId 
+						+ "/experimentGroups/" 	+ expGrpId 
+						+ "/experimentSetting/" + UUIDConverter.getUuidFromBase64(setting.getId());
 		}
 		return null;
 	}
@@ -181,14 +216,16 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
 		if(localRepo != null) {
-			ExperimentGroup expGrp = repoService.getExperimentGroupById(localRepo, expGrpId);
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(localRepo, expGrpId);
 			
-			List<String> settingIds = new ArrayList<String>();
-			
-			for (ExperimentSetting setting : expGrp.getExperimentSettings()) {
-				settingIds.add(setting.getId());
+			if(expGrp != null) {
+				List<String> settingIds = new ArrayList<String>();
+				
+				for (ExperimentSetting setting : expGrp.getExperimentSettings()) {
+					settingIds.add(setting.getId());
+				}
+				return settingIds;
 			}
-			return settingIds;
 		}
 		return null;
 	}
@@ -200,25 +237,20 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
 		if(localRepo != null) {
-			ExperimentGroup expGrp = repoService.getExperimentGroupById(localRepo, expGrpId);
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(localRepo, expGrpId);
 			
 			if(expGrp != null) {
 				
-				ExperimentSetting setting = expGrp.getExperimentSettings()
-						.stream()
-						.filter(set -> set.getId().matches(settingsId))
-						.findAny()
-						.orElse(null);
+				ExperimentSetting setting = metaService.getExperimentSettingFromExperimentGroup(expGrp, settingsId);
 				
 				if(setting != null) {
 					return DTOHelper.getExperimentSettingDTO(setting);
 				}
 			}			
 		}
-		
 		return null;
 	}
-
+	
 	@POST
 	@Consumes("application/json")
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRun")
@@ -228,25 +260,14 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
 		
 		if(localRepo != null) {
-			ExperimentGroup expGrp = repoService.getExperimentGroupById(localRepo, expGrpId);
 			
-			if(expGrp != null) {
-				ExperimentSetting setting = expGrp.getExperimentSettings()
-						.stream()
-						.filter(set -> set.getId().matches(expGrpId))
-						.findAny()
-						.orElse(null);
-				
-				if(setting != null) {
-					ExperimentRun run = EXPERIMENT_DATA_FACTORY.createExperimentRun(setting);	
-					
-					if(run != null) {
-						return "/repository/" + repoId 
-								+ "/experimentGroups/" + expGrpId 
-								+ "/experimentSettings/" + settingId 
-								+ "/experimentRun/" + run.getId();
-					}
-				}
+			ExperimentRun run = metaService.createExperimentRun(localRepo, expGrpId, settingId, newRun);
+
+			if(run != null) {
+				return "/repository/" + repoId 
+						+ "/experimentGroups/" + expGrpId 
+						+ "/experimentSettings/" + settingId 
+						+ "/experimentRun/" + UUIDConverter.getUuidFromBase64(run.getId());
 			}
 		}		
 		return null;
@@ -260,16 +281,11 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
 		
 		if(localRepo != null) {
-			ExperimentGroup expGrp = repoService.getExperimentGroupById(localRepo, grpId);
-			
+					
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(localRepo, grpId);
 			if(expGrp != null) {
-				// get experiment Setting
 				
-				ExperimentSetting setting = expGrp.getExperimentSettings()
-						.stream()
-						.filter(set -> set.getId().matches(settingsId))
-						.findAny()
-						.orElse(null);
+				ExperimentSetting setting = metaService.getExperimentSettingFromExperimentGroup(expGrp, settingsId);
 				if(setting != null) {
 					// get the experimentRuns
 					
@@ -294,18 +310,19 @@ public class MetadataResource implements RemoteRepositoryAPI {
 		LocalDirectoryRepository repo = repoService.findRepositoryByApiId(repoId);
 		
 		if(repo != null) {
-			ExperimentSetting setting = repoService.getExperimentSettingById(repo, settingsId);
 			
-			if(setting != null) {
-				ExperimentRun run = setting.getExperimentRuns()
-						.stream()
-						.filter(r -> r.getId().matches(runId))
-						.findAny()
-						.orElse(null);
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(repo, grpId);
+			if(expGrp != null) {
 				
-				if(run != null)
-					return DTOHelper.getExperimentRunDTO(run);
+				ExperimentSetting setting = metaService.getExperimentSettingFromExperimentGroup(expGrp, settingsId);
+				if(setting != null) {
+					
+					ExperimentRun run = metaService.getExperimentRunFromExperimentSetting(setting, runId);
+					if(run != null)
+						return DTOHelper.getExperimentRunDTO(run);
+				}
 			}
+
 		}
 		return null;
 	}
@@ -343,15 +360,56 @@ public class MetadataResource implements RemoteRepositoryAPI {
 	@Path("/dataseries")
 	public String uploadRawDataSeries(RepositoryInfoDTO repo) {
 
+		ExperimentDataFactory FACT = ExperimentDataFactory.eINSTANCE;
+		
+		FACT.createDoubleBinaryMeasurements();
+		
 		URI directory = URI.createFileURI(BASE_PATH + "\\" + repo.getName());
 
 		// use path of RepositoryService to find the MeasuremntsDaoFactory
 		MeasurementsDaoFactory factory = LocalDirectoryMeasurementsDaoFactory.getRegisteredFactory(directory);
 		
-		factory.createLongMeasurementsDao(null);
 		
 		// MeasurementsDao<> mDao = factory.createDoubleMeasurementsDao();
 		return null;
+	}
+	
+	@POST
+	@Path("/dataseries/default")
+	public Response createDefaultExperimentSetup(DefaultConfigurationDTO config) {
+		
+		// 1. Get the Run
+		Repository repo = repoService.findRepositoryByApiId(config.getRepoId());
+		
+		if(repo != null) {
+			ExperimentGroup expGrp = metaService.getExperimentGroupFromRepository(repo, config.getGroupId());
+			if(expGrp != null) {
+				ExperimentSetting setting = metaService.getExperimentSettingFromExperimentGroup(expGrp, config.getGroupId());
+				if(setting != null) {
+					ExperimentRun run = metaService.getExperimentRunFromExperimentSetting(setting, config.getRunId());
+					
+					// 2. create default setting to store rawMeasurement
+					
+					dataService.prepareDefaultSetup(run, config);
+					
+				}
+			}
+		}
+		
+		
+		return Response.status(Status.NOT_IMPLEMENTED).build();
+	}
+	
+	@POST
+	@Path("/dataseries/double")
+	public Response addDoubleDataSeries() {
+		
+		// 1. Get the Run
+		// 2. Get the Measurement
+		// 3. Get Range
+		// 4. Add through rawMeasurements the Dataseries
+		
+		return Response.status(Status.NOT_IMPLEMENTED).build();
 	}
 
 }
