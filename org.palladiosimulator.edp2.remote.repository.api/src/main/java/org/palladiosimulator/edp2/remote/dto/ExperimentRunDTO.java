@@ -6,7 +6,7 @@ import java.util.List;
 public class ExperimentRunDTO {
 
 	private String id;
-	private int duration;
+	private long duration;
 	private Date startTime;
 	private List<MeasurementDTO> measurements;
 	
@@ -16,10 +16,10 @@ public class ExperimentRunDTO {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public int getDuration() {
+	public long getDuration() {
 		return duration;
 	}
-	public void setDuration(int duration) {
+	public void setDuration(long duration) {
 		this.duration = duration;
 	}
 	public Date getStartTime() {
