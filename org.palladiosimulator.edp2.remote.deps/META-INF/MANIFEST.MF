@@ -6,5 +6,6 @@ Bundle-Vendor: My Company
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: org.palladiosimulator.edp2.remote.deps;singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.palladiosimulator.edp2.repository.local;bundle-version="4.2.0"
+Require-Bundle: org.palladiosimulator.edp2.repository.local;bundle-version="4.2.0", 
+ org.palladiosimulator.edp2.util;bundle-version="4.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
