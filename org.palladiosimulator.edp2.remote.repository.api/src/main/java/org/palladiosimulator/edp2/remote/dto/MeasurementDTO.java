@@ -1,17 +1,17 @@
 package org.palladiosimulator.edp2.remote.dto;
 
-import java.util.List;
-
 public class MeasurementDTO {
 
 	private String id;
 	
-	private String endTime;
+	private String runId;
 	
-	private String startTime;
+	private long endTime;
 	
-	private String measuringType;
+	private long startTime;
 	
+	private String measuringTypeId;
+
 	public String getId() {
 		return id;
 	}
@@ -20,29 +20,36 @@ public class MeasurementDTO {
 		this.id = id;
 	}
 
-	public String getEndTime() {
+	public String getRunId() {
+		return runId;
+	}
+
+	public void setRunId(String runId) {
+		this.runId = runId;
+	}
+
+	public long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(long endTime) {
 		this.endTime = endTime;
 	}
 
-	public String getStartTime() {
+	public long getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(long startTime) {
 		this.startTime = startTime;
 	}
 
-	public List<DataSeriesDTO> getDataSeries() {
-		return dataSeries;
+	public String getMeasuringTypeId() {
+		return measuringTypeId;
 	}
 
-	public void setDataSeries(List<DataSeriesDTO> dataSeries) {
-		this.dataSeries = dataSeries;
+	public void setMeasuringTypeId(String measuringTypeId) {
+		this.measuringTypeId = measuringTypeId;
 	}
-
-	private List<DataSeriesDTO> dataSeries;
+	
 }
