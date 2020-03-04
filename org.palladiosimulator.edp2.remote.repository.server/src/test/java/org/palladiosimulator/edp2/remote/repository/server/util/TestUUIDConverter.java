@@ -13,7 +13,7 @@ public class TestUUIDConverter {
 	
 	@Test
 	void convertBase64ToUUID_returnsCorrectUuidString() {
-		String testUuid = UUIDConverter.getUuidFromBase64(base64);
+		String testUuid = UUIDConverter.getHexFromBase64(base64);
 		
 		Assertions.assertTrue(testUuid.length() == 36,"Got Length: " + testUuid.length());
 		Assertions.assertTrue(Pattern.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", testUuid), testUuid);		
@@ -21,8 +21,8 @@ public class TestUUIDConverter {
 	
 	@Test
 	void convertUuidToBase64_returnsCorrectUuidString() {
-		String uuid = UUIDConverter.getUuidFromBase64(base64);
-		String testUuid = UUIDConverter.getBase64FromUuid(uuid);
+		String uuid = UUIDConverter.getHexFromBase64(base64);
+		String testUuid = UUIDConverter.getBase64FromHex(uuid);
 		
 		Assertions.assertTrue(Pattern.matches("^_?[-A-Za-z0-9+=]{1,50}", testUuid), testUuid);
 	}
@@ -37,8 +37,8 @@ public class TestUUIDConverter {
 		String[] base64TestResults = new String[base64TestExamples.length];
 		
 		for (int i = 0; i < base64TestResults.length; i++) {
-			String temp = UUIDConverter.getUuidFromBase64(base64TestExamples[i]);
-			base64TestResults[i] = UUIDConverter.getBase64FromUuid(temp);
+			String temp = UUIDConverter.getHexFromBase64(base64TestExamples[i]);
+			base64TestResults[i] = UUIDConverter.getBase64FromHex(temp);
 		}
 		
 		for (int i = 0; i < base64TestResults.length; i++) {
@@ -55,8 +55,8 @@ public class TestUUIDConverter {
 		String[] uuidTestResults = new String[uuidTestExamples.length];
 		
 		for (int i = 0; i < uuidTestResults.length; i++) {
-			String temp = UUIDConverter.getBase64FromUuid(uuidTestExamples[i]);
-			uuidTestResults[i] = UUIDConverter.getUuidFromBase64(temp);
+			String temp = UUIDConverter.getBase64FromHex(uuidTestExamples[i]);
+			uuidTestResults[i] = UUIDConverter.getHexFromBase64(temp);
 		}
 		
 		for (int i = 0; i < uuidTestResults.length; i++) {

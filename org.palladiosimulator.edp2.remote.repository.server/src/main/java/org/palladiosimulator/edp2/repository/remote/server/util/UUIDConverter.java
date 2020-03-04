@@ -9,24 +9,8 @@ import org.apache.commons.codec.binary.Hex;
 
 public class UUIDConverter {
 
-	public static String getBase64FromHexUuid(final String uuid) throws DecoderException {
-		// remove "-"
-		String result = uuid.replace("-", "");
-		
-		String newBase64 = new String(Base64.encodeBase64(result.getBytes()));
-		
-		return newBase64;
-	}
-	
-	public static String getHexfromBase64(final String base64Id) {
-		
-		
-		byte[] decoded64 = Base64.decodeBase64(base64Id);
-		
-		return Hex.encodeHexString(decoded64);
-	}
-	
-	public static String getUuidFromBase64(final String base64) {
+
+	public static String getHexFromBase64(final String base64) {
 		String temp = "";
 		if(base64.startsWith("_")) {
 			temp = base64.substring(1, base64.length());
@@ -38,7 +22,7 @@ public class UUIDConverter {
 	    return uuid.toString();
 	}
 	
-	public static String getBase64FromUuid(final String uuidStr) {
+	public static String getBase64FromHex(final String uuidStr) {
 	    UUID uuid = UUID.fromString(uuidStr);
 	    ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
 	    bb.putLong(uuid.getMostSignificantBits());
