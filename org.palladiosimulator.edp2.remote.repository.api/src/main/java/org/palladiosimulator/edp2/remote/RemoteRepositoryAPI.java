@@ -32,45 +32,45 @@ public interface RemoteRepositoryAPI {
 	public List<RepositoryInfoDTO> getAllRepositories();
 	
 	@GET
-	@Path("/repository/{name}/experimentGroups")
-	public List<ExperimentGroupDTO> getExperimentGroupsOfRepo(@PathParam("name") String repoName);
+	@Path("/repository/{repoId}/experimentGroups")
+	public Response getExperimentGroupsOfRepo(@PathParam("repoId") String repoId);
 	
 	@GET
-	@Path("/repository/{name}/experimentGroups/{id}")
-	public ExperimentGroupDTO getExperimentGroupFromRepo(@PathParam("name") String repoName, @PathParam("id") String expGrpId);
+	@Path("/repository/{repoId}/experimentGroups/{grpId}")
+	public Response getExperimentGroupFromRepo(@PathParam("repoId") String repoName, @PathParam("grpId") String expGrpId);
 
 	@POST
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSetting")
-	public String createExperimentSetting(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, ExperimentSettingDTO newSetting);
+	public Response createExperimentSetting(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, ExperimentSettingDTO newSetting);
 	
 	@GET
-	@Path("/repository/{name}/experimentGroups/{id}/experimentSettings")
-	public List<String> getExperimentSettings(@PathParam("name") String repoName, @PathParam("id") String expGrpId);
+	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings")
+	public Response getExperimentSettings(@PathParam("repoId") String repoName, @PathParam("grpId") String expGrpId);
 	
 	@GET
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingsId}")
-	public ExperimentSettingDTO getExperimentSetting(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, @PathParam("settingsId") String settingsId);
+	public Response getExperimentSetting(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, @PathParam("settingsId") String settingsId);
 	
 	@POST
 	@Consumes("application/json")
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRun")
-	public String createExperimentRun(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, @PathParam("settingId") String settingId, ExperimentRunDTO newRun);
+	public Response createExperimentRun(@PathParam("repoId") String repoId, @PathParam("grpId") String expGrpId, @PathParam("settingId") String settingId, ExperimentRunDTO newRun);
 	
 	@GET
-	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingsId}/experimentRuns")
-	public List<ExperimentRunDTO> getExperimentRuns(@PathParam("repoId") String repoId, @PathParam("grpId") String grpId, @PathParam("settingsId") String settingsId);
+	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns")
+	public Response getExperimentRuns(@PathParam("repoId") String repoId, @PathParam("grpId") String grpId, @PathParam("settingId") String settingId);
 	
 	@GET
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingsId}/experimentRuns/{runId}")
-	public ExperimentRunDTO getExperimentRun(@PathParam("repoId") String repoId, @PathParam("grpId") String grpId, @PathParam("settingsId") String settingsId, @PathParam("runId") String runId);	
+	public Response getExperimentRun(@PathParam("repoId") String repoId, @PathParam("grpId") String grpId, @PathParam("settingsId") String settingsId, @PathParam("runId") String runId);	
 	
 	@GET
-	@Path("/repository/{name}/measurements")
-	public String getMeasurementsOfRepo(@PathParam("name") String repoName);
+	@Path("/repository/{repoId}/measurements")
+	public String getMeasurementsOfRepo(@PathParam("repoId") String repoName);
 	
 	@GET
-	@Path("/repository/{name}/measurements{measureId}/dataSeries")
-	public String getDataSeriesOfMeasurement(@PathParam("name") String repoName, @PathParam("measureId") String measureId);
+	@Path("/repository/{repoId}/measurements{measureId}/dataSeries")
+	public String getDataSeriesOfMeasurement(@PathParam("repoId") String repoName, @PathParam("measureId") String measureId);
 	
 	
 	
