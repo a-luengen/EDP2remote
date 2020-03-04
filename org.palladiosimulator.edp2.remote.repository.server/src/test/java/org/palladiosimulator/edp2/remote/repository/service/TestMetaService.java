@@ -6,15 +6,26 @@ import org.palladiosimulator.edp2.models.ExperimentData.ExperimentDataFactory;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentGroup;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentRun;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentSetting;
+import org.palladiosimulator.edp2.models.ExperimentData.MeasuringType;
 import org.palladiosimulator.edp2.models.Repository.Repository;
+import org.palladiosimulator.edp2.models.measuringpoint.MeasuringPoint;
 import org.palladiosimulator.edp2.models.measuringpoint.MeasuringPointRepository;
 import org.palladiosimulator.edp2.models.measuringpoint.MeasuringpointFactory;
 import org.palladiosimulator.edp2.models.measuringpoint.StringMeasuringPoint;
 import org.palladiosimulator.edp2.remote.dto.ExperimentRunDTO;
 import org.palladiosimulator.edp2.remote.dto.ExperimentSettingDTO;
 import org.palladiosimulator.edp2.remote.dto.MeasuringPointDTO;
+import org.palladiosimulator.edp2.remote.dto.MeasuringTypeDTO;
+import org.palladiosimulator.edp2.remote.dto.TextualBaseMetricDescriptionDTO;
+import org.palladiosimulator.edp2.repository.remote.server.resources.UUIDGenerator;
 import org.palladiosimulator.edp2.repository.remote.server.service.MetaService;
+import org.palladiosimulator.edp2.repository.remote.server.util.DTOHelper;
 import org.palladiosimulator.edp2.repository.remote.server.util.UUIDConverter;
+import org.palladiosimulator.edp2.util.MetricDescriptionUtility;
+import org.palladiosimulator.metricspec.MetricDescription;
+import org.palladiosimulator.metricspec.TextualBaseMetricDescription;
+import org.palladiosimulator.metricspec.constants.MetricDescriptionConstants;
+import org.palladiosimulator.metricspec.util.builder.TextualBaseMetricDescriptionBuilder;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +58,7 @@ public class TestMetaService extends BasicEDP2Test {
 		
 		ExperimentGroup grp = mService.createExperimentGroup(ldRepo, "");
 		
-		String grpUuid = UUIDConverter.getUuidFromBase64(grp.getId());
+		String grpUuid = UUIDConverter.getHexFromBase64(grp.getId());
 		
 		ExperimentGroup testGrp = mService.getExperimentGroupFromRepository(ldRepo, grpUuid);
 		
@@ -66,7 +77,7 @@ public class TestMetaService extends BasicEDP2Test {
 			repo.getExperimentGroups().add(temp);
 		}
 		
-		String groupUuid = UUIDConverter.getUuidFromBase64(expGrp.getId());
+		String groupUuid = UUIDConverter.getHexFromBase64(expGrp.getId());
 		
 		ExperimentSettingDTO settingDTO = new ExperimentSettingDTO();
 		settingDTO.setGroupId(groupUuid);
@@ -96,7 +107,7 @@ public class TestMetaService extends BasicEDP2Test {
 		
 		ExperimentGroup testGroup = ExperimentDataFactory.eINSTANCE.createExperimentGroup();
 		testRepo.getExperimentGroups().add(testGroup);
-		String groupId = UUIDConverter.getUuidFromBase64(testGroup.getId());
+		String groupId = UUIDConverter.getHexFromBase64(testGroup.getId());
 		ExperimentSetting testSetting3 = mService.createExperimentSetting(
 				testRepo, 
 				groupId, 
@@ -122,7 +133,7 @@ public class TestMetaService extends BasicEDP2Test {
 		ExperimentGroup grp = ExperimentDataFactory.eINSTANCE.createExperimentGroup();
 		ExperimentSetting setting = ExperimentDataFactory.eINSTANCE.createExperimentSetting(grp, "Test");
 		grp.getExperimentSettings().add(setting);
-		String validSettingId = UUIDConverter.getUuidFromBase64(setting.getId());
+		String validSettingId = UUIDConverter.getHexFromBase64(setting.getId());
 		
 		// create some random Settings
 		int settingsCount = 10;
@@ -151,8 +162,8 @@ public class TestMetaService extends BasicEDP2Test {
 		ExperimentSetting setting = ExperimentDataFactory.eINSTANCE.createExperimentSetting();
 		setting.setExperimentGroup(grp);
 		
-		String grpApiUuid = UUIDConverter.getUuidFromBase64(grp.getId());
-		String setApiUuid = UUIDConverter.getUuidFromBase64(setting.getId());
+		String grpApiUuid = UUIDConverter.getHexFromBase64(grp.getId());
+		String setApiUuid = UUIDConverter.getHexFromBase64(setting.getId());
 		
 		ExperimentRunDTO dto = new ExperimentRunDTO();
 		dto.setDuration(1000000000);
@@ -172,6 +183,7 @@ public class TestMetaService extends BasicEDP2Test {
 				hasItem(testRun));
 	}
 	
+	@Test
 	void providingValidData_createStringMeasuringPoint_ShouldReturn_StringMeasuringPoint() {
 		ExperimentGroup grp = ExperimentDataFactory.eINSTANCE.createExperimentGroup();
 		
@@ -192,9 +204,41 @@ public class TestMetaService extends BasicEDP2Test {
 		assertThat("StringMeasuringPoint should be contained in MeasuringPointRepository of the ExperimentGroup.",
 				grp.getMeasuringPointRepositories().get(0).getMeasuringPoints(), hasItem(testSmp));
 
-		
 	}
 	
+	@Test
+	void providingValidData_createMeasuringType_ShouldReturn_MeasuringType() {
+		
+		// arrange
+		ExperimentGroup expGrp = ExperimentDataFactory.eINSTANCE.createExperimentGroup();
+		expGrp.getMeasuringPointRepositories().add(
+				MeasuringpointFactory.eINSTANCE.createMeasuringPointRepository());
+		
+		MetricDescription mDesc = TextualBaseMetricDescriptionBuilder
+				.newTextualBaseMetricDescriptionBuilder()
+				.name("TextName")
+				.id(UUIDConverter.getBase64FromHex(UUID.randomUUID().toString()))
+				.build();
+		
+		String measuringPointString = "Schnittstelle Test 1";
+		MeasuringPoint mp = MeasuringpointFactory.eINSTANCE.createStringMeasuringPoint();
+		mp.setStringRepresentation(measuringPointString);
+				
+		String hexExpGrpId = UUIDConverter.getHexFromBase64(expGrp.getId());
+		TextualBaseMetricDescriptionDTO tbmd = DTOHelper.getTextualBaseMetricDescription((TextualBaseMetricDescription)mDesc);
+		
+		MeasuringTypeDTO mtDto = new MeasuringTypeDTO();
+		mtDto.setExperimentGroupId(hexExpGrpId);
+		mtDto.setTextualBaseMetricDescription(tbmd);
+		mtDto.setMeasuringPointStringRepresentation(measuringPointString);
+		
+		// act
+		MeasuringType mt = mService.createAndInitMeasuringType(expGrp, mtDto);
+		
+		// assert
+		Assertions.assertNotNull(mt, "MeasuringType should not be null.");
+		assertThat("The ExperimentGroup should contain the new MeasuringType.", expGrp.getMeasuringTypes(), hasItem(mt));
+	}
 	
 	
 	
