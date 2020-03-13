@@ -136,10 +136,10 @@ public class MetaService {
 	public ExperimentSetting getExperimentSettingFromExperimentGroup(ExperimentGroup expGrp, String settingUuid) {
 		String internalId = UUIDConverter.getBase64FromHex(settingUuid);
 
-		ExperimentSetting setting = expGrp.getExperimentSettings().stream()
-				.filter(set -> set.getId().matches(internalId)).findAny().orElse(null);
-
-		return setting;
+		return expGrp.getExperimentSettings().stream()
+				.filter(set -> set.getId().matches(internalId))
+				.findAny()
+				.orElse(null);
 	}
 
 	/**
@@ -184,10 +184,8 @@ public class MetaService {
 	public ExperimentRun getExperimentRunFromExperimentSetting(ExperimentSetting setting, String runUuid) {
 		String internalId = UUIDConverter.getHexFromBase64(runUuid);
 
-		ExperimentRun run = setting.getExperimentRuns().stream().filter(r -> r.getId().matches(internalId)).findAny()
+		return setting.getExperimentRuns().stream().filter(r -> r.getId().matches(internalId)).findAny()
 				.orElse(null);
-
-		return run;
 	}
 
 	/**
@@ -273,6 +271,16 @@ public class MetaService {
 		MeasurementsUtility.createDAOsForRawMeasurements(rawMeasurement);
 		
 		return m;
+	}
+	
+	public Measurement getMeasurementFromExperimentRun(ExperimentRun run, String measurementId) {
+		String internalId = UUIDConverter.getBase64FromHex(measurementId);
+		
+		return run.getMeasurement()
+				.stream()
+				.filter(m -> m.getId().contentEquals(internalId))
+				.findAny()
+				.orElse(null);
 	}
 	
 	private MeasuringType getMeasuringTypeFromExperimentSettingById(ExperimentSetting setting, String externalId) {
