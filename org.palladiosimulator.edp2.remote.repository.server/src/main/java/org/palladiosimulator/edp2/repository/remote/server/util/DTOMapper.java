@@ -25,14 +25,15 @@ import org.palladiosimulator.edp2.remote.dto.TextualBaseMetricDescriptionDTO;
 import org.palladiosimulator.edp2.repository.remote.server.service.RepositoriesService;
 import org.palladiosimulator.metricspec.TextualBaseMetricDescription;
 
-public class DTOHelper {
+public class DTOMapper {
 
 	
 	public static RepositoryInfoDTO getRepositoryInfoDTO(Repository repo, RepositoriesService repoService, String routePrefix) {
 		RepositoryInfoDTO dto = new RepositoryInfoDTO();
 		
 		dto.setId(repoService.getApiIdfromRepo(repo));
-		dto.setName(routePrefix + "/" + UUIDConverter.getHexFromBase64(dto.getId()));
+		
+		dto.setName(routePrefix + "/" + dto.getId());
 		
 		List<String> expGrpList = new ArrayList<String>();
 		for (ExperimentGroup group : repo.getExperimentGroups())
