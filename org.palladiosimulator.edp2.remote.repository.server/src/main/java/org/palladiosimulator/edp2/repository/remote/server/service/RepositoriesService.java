@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.jboss.logging.Logger;
 import org.palladiosimulator.edp2.impl.RepositoryManager;
 import org.palladiosimulator.edp2.local.LocalDirectoryRepository;
 import org.palladiosimulator.edp2.models.ExperimentData.ExperimentGroup;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Component;
 public class RepositoriesService {
 
 	private final String BASE_PATH = "\\Repositories\\eclipseWorkspace\\EDP2_BASE";
+	
+	private final Logger LOGGER = Logger.getLogger(RepositoriesService.class.getCanonicalName());
 	
 	private Repositories repos;
 
@@ -44,6 +47,10 @@ public class RepositoriesService {
 			repositoriesRes.save(Collections.EMPTY_MAP);
 		}
 		repos = (Repositories) repositoriesRes.getContents().get(0);
+		
+		for(Repository repo : repos.getAvailableRepositories()) {
+			LOGGER.info("Retrieved Repository: " + repo.getId());
+		}
 	}
 	
 	/**
@@ -119,7 +126,6 @@ public class RepositoriesService {
 	 * @return Reference to the Repository at the given directory
 	 */
 	public LocalDirectoryRepository findOrInitRepository(final String directoryPath) {
-		
 		for(Repository repo : repos.getAvailableRepositories()) {
 			if(repo instanceof LocalDirectoryRepository) {
 				LocalDirectoryRepository localRepo = (LocalDirectoryRepository) repo;
@@ -207,6 +213,7 @@ public class RepositoriesService {
 	public boolean saveCurrentState() {
 		try {
 			repos.eResource().save(Collections.EMPTY_MAP);
+			LOGGER.info("Persisted current state.");
 		} catch (IOException e) {
 			System.err.println("[RepositoriesService]\n" + e.getMessage());
 			e.printStackTrace();

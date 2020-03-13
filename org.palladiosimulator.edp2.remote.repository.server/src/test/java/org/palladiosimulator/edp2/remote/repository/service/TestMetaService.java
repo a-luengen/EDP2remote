@@ -19,7 +19,7 @@ import org.palladiosimulator.edp2.remote.dto.MeasuringTypeDTO;
 import org.palladiosimulator.edp2.remote.dto.TextualBaseMetricDescriptionDTO;
 import org.palladiosimulator.edp2.repository.remote.server.resources.UUIDGenerator;
 import org.palladiosimulator.edp2.repository.remote.server.service.MetaService;
-import org.palladiosimulator.edp2.repository.remote.server.util.DTOHelper;
+import org.palladiosimulator.edp2.repository.remote.server.util.DTOMapper;
 import org.palladiosimulator.edp2.repository.remote.server.util.UUIDConverter;
 import org.palladiosimulator.edp2.util.MetricDescriptionUtility;
 import org.palladiosimulator.metricspec.MetricDescription;
@@ -225,7 +225,7 @@ public class TestMetaService extends BasicEDP2Test {
 		mp.setStringRepresentation(measuringPointString);
 				
 		String hexExpGrpId = UUIDConverter.getHexFromBase64(expGrp.getId());
-		TextualBaseMetricDescriptionDTO tbmd = DTOHelper.getTextualBaseMetricDescription((TextualBaseMetricDescription)mDesc);
+		TextualBaseMetricDescriptionDTO tbmd = DTOMapper.getTextualBaseMetricDescription((TextualBaseMetricDescription)mDesc);
 		
 		MeasuringTypeDTO mtDto = new MeasuringTypeDTO();
 		mtDto.setExperimentGroupId(hexExpGrpId);
