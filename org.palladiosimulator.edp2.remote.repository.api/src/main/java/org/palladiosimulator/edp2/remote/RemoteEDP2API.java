@@ -18,7 +18,7 @@ import org.palladiosimulator.edp2.remote.dto.RepositoryInfoDTO;
 
 @Path("/repo")
 @Produces(MediaType.APPLICATION_JSON)
-public interface RemoteRepositoryAPI {
+public interface RemoteEDP2API {
 	
 	@POST
 	@Consumes("application/json")
@@ -63,15 +63,4 @@ public interface RemoteRepositoryAPI {
 	@GET
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingsId}/experimentRuns/{runId}")
 	public Response getExperimentRun(@PathParam("repoId") String repoId, @PathParam("grpId") String grpId, @PathParam("settingsId") String settingsId, @PathParam("runId") String runId);	
-	
-	@GET
-	@Path("/repository/{repoId}/measurements")
-	public String getMeasurementsOfRepo(@PathParam("repoId") String repoName);
-	
-	@GET
-	@Path("/repository/{repoId}/measurements{measureId}/dataSeries")
-	public String getDataSeriesOfMeasurement(@PathParam("repoId") String repoName, @PathParam("measureId") String measureId);
-	
-	
-	
 }
