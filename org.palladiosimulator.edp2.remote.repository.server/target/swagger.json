@@ -1,0 +1,858 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Remote EDP2 API",
+    "description" : "API for remote persistency of EDP2 compatible data.",
+    "version" : "0.1.0"
+  },
+  "tags" : [ {
+    "name" : "repository",
+    "description" : "Methods for Repository Resource."
+  }, {
+    "name" : "experimentGroup",
+    "description" : "Methods for ExperimentGroup Resource."
+  }, {
+    "name" : "experimentSetting",
+    "description" : "Methods for ExperimentSetting Resource."
+  }, {
+    "name" : "experimentRun",
+    "description" : "Methods for ExperimentRun Resource."
+  }, {
+    "name" : "measurement",
+    "description" : "Methods for Measurement Resource."
+  }, {
+    "name" : "measuringPoint",
+    "description" : "Methods for MeasuringPoint Resource."
+  } ],
+  "paths" : {
+    "/meta/repository" : {
+      "post" : {
+        "tags" : [ "repository" ],
+        "summary" : "Create new Repository",
+        "description" : "Creates a new Repository and returns infos about the Repository.",
+        "operationId" : "createRepository",
+        "responses" : {
+          "default" : {
+            "description" : "The repository info",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RepositoryInfoDTO"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Repository could not be created due to internal issues."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}/measurement" : {
+      "post" : {
+        "tags" : [ "measurement" ],
+        "summary" : "Create new Measurement",
+        "description" : "Creates a new Measurement as specified in the Measurment-Model in the Meta-Resources specified by their respective Ids.",
+        "operationId" : "createMeasurement",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "settingId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Model for the Measurement that should be created.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MeasurementDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Returns info about the created Measurement.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeasurementDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup, ExperimentSetting or ExperimentRun could not be found."
+          }
+        }
+      }
+    },
+    "/meta/repositories" : {
+      "get" : {
+        "tags" : [ "repository" ],
+        "summary" : "Get all availables Repositories.",
+        "description" : "Get a list of all available Respositories from the server.",
+        "operationId" : "getAllRepositories",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RepositoryInfoDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meta/dataseries/double" : {
+      "post" : {
+        "tags" : [ "dataseries" ],
+        "summary" : "Add DataSeries of type Long.",
+        "description" : "Add DataSeries to a Measurement containing values of type long.",
+        "operationId" : "addLongDataSeries",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LongBinaryDataSeriesDTO"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Adds long type values to the DataSeries into the Meta-Object hierarchy as specified in the DTO."
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup, ExperimentSetting, ExperimentRun or Measurement could not be found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}" : {
+      "get" : {
+        "tags" : [ "experimentRun" ],
+        "summary" : "Get infos of ExperimentRun.",
+        "description" : "Get info of the ExperimentRun from the ExperimentSetting, ExperimentGroup and Repository with their respective Ids.",
+        "operationId" : "getExperimentRun",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "settingId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "runId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns infos about the ExperimentRun.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentRunDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup, ExperimentSetting or ExperimentRun with respective Id is not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns" : {
+      "get" : {
+        "tags" : [ "experimentRun" ],
+        "summary" : "Get all ExperimentRuns of ExperimentSetting.",
+        "description" : "Get Infos for all available ExperimentRuns of the ExperimentSetting in the ExperimentGroup and Repository with their respective Id.",
+        "operationId" : "getExperimentRuns",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "settingId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Returns an Array of infos for all available ExperimentRuns.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ExperimentRunDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup or ExperimentSetting with given Id is not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{id}/experimentGroup" : {
+      "post" : {
+        "tags" : [ "experimentGroup" ],
+        "summary" : "Create new ExperimentGroup.",
+        "description" : "Create a new ExperimentGroup in the Repository with the given Id.",
+        "operationId" : "createExperimentGroup",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Name of the ExperimentGroup.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Information about the new created ExperimentGroup.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentGroupDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository not found."
+          },
+          "500" : {
+            "description" : "ExperimentGroup could not be created."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRun" : {
+      "post" : {
+        "tags" : [ "experimentRun" ],
+        "summary" : "Create new ExperimentRun.",
+        "description" : "Create a new ExperimentRun in the ExperimentSetting, ExperimentGroup and Repository with their respective Id.",
+        "operationId" : "createExperimentRun",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "settingId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Properties of the ExperimentRun that should be created.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExperimentRunDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "ExperimentRun was created and response contains basic info",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentRunDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup of ExperimentSetting with the given Id was not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{id}" : {
+      "get" : {
+        "tags" : [ "experimentGroup" ],
+        "summary" : "Get ExperimentGroup from Repository",
+        "description" : "Get the representation of the ExperimentGroup with the given Id of the Repository with the given Id.",
+        "operationId" : "getExperimentGroupFromRepo",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Representation of the ExperimentGroup.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentGroupDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSetting" : {
+      "post" : {
+        "tags" : [ "experimentSetting" ],
+        "summary" : "Create a ExperimentSetting.",
+        "description" : "Create a new ExperimentSetting in the ExperimentGroup and Repository with their respective Id.",
+        "operationId" : "createExperimentSetting",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Properties of the ExperimentSetting that should be created.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExperimentSettingDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "ExperimentSetting created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentSettingDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "ExperimentGroup or Repository not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{id}/experimentGroups" : {
+      "get" : {
+        "tags" : [ "experimentGroup" ],
+        "summary" : "Get all ExperimentGroups in Repository",
+        "description" : "Get a list of all available ExperimentGroups from the Repository with the given Id.",
+        "operationId" : "getExperimentGroupsOfRepo",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of all ExperimentGroups of the Repository.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ExperimentGroupDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings" : {
+      "get" : {
+        "tags" : [ "experimentSetting" ],
+        "summary" : "Get ExperimentSettings from ExperimentGroup.",
+        "description" : "Get List of available ExperimentSettings from ExperimentGroup in Repository with their respective Ids.",
+        "operationId" : "getExperimentSettings",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "All ExperimentSettings retrieved.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ExperimentSettingDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository or ExperimentGroup not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}" : {
+      "get" : {
+        "tags" : [ "experimentSetting" ],
+        "summary" : "Get ExperimentSetting",
+        "description" : "Get the ExperimentGroup with the given Id from the Repository and ExperimentGroup with their respective Ids.",
+        "operationId" : "getExperimentSetting",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "settingId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Response with the ExperimentSetting info.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExperimentSettingDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository, ExperimentGroup or ExperimentSetting not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/measuringPoint" : {
+      "post" : {
+        "tags" : [ "measuringPoint" ],
+        "summary" : "Create new MeasuringPoint.",
+        "description" : "Creates a new MeasuringPoint in the ExperimentGroup with the given Id as specified in the MeasuringPointDTO.",
+        "operationId" : "createMeasuringPoint",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Properties of the MeasuringPoint that should be created.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MeasuringPointDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Created MeasuringPoint",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeasuringPointDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Repository or ExperimentGroup not found."
+          }
+        }
+      }
+    },
+    "/meta/repository/{repoId}/experimentGroups/{grpId}/measuringType" : {
+      "post" : {
+        "tags" : [ "measuringType" ],
+        "summary" : "Create a new MeasuringType.",
+        "description" : "Create a new MeasuringType in the ExperimentGroup and Repository with their respective Id.",
+        "operationId" : "createMeasuringType",
+        "parameters" : [ {
+          "name" : "repoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "grpId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "Properties of the MeasuringType that should be created.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MeasuringTypeDTO"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Create a new MeasuringType as described by the provided MeasringTypeDTO.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeasuringTypeDTO"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "ExperimentGroup or Repository not found."
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "RepositoryInfoDTO" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "experimentGroupIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "MeasurementDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "runId" : {
+            "type" : "string"
+          },
+          "endTime" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "startTime" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "measuringTypeId" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LongBinaryDataSeriesDTO" : {
+        "type" : "object",
+        "properties" : {
+          "repoId" : {
+            "type" : "string"
+          },
+          "grpId" : {
+            "type" : "string"
+          },
+          "settingId" : {
+            "type" : "string"
+          },
+          "runId" : {
+            "type" : "string"
+          },
+          "measurementId" : {
+            "type" : "string"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        }
+      },
+      "ExperimentRunDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "duration" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "startTime" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "measurements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MeasurementDTO"
+            }
+          }
+        }
+      },
+      "ExperimentGroupDTO" : {
+        "type" : "object",
+        "properties" : {
+          "uuid" : {
+            "type" : "string"
+          },
+          "purpose" : {
+            "type" : "string"
+          },
+          "measuringpointRepositoryIDs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "measuringTypeIDs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "experimentSettingIDs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "ExperimentSettingDTO" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "groupId" : {
+            "type" : "string"
+          },
+          "experimentRunIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "measuringTypeIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "MeasuringPointDTO" : {
+        "type" : "object",
+        "properties" : {
+          "measuringPointDescription" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MeasuringTypeDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "experimentGroupId" : {
+            "type" : "string"
+          },
+          "measuringPointStringRepresentation" : {
+            "type" : "string"
+          },
+          "textualBaseMetricDescription" : {
+            "$ref" : "#/components/schemas/TextualBaseMetricDescriptionDTO"
+          }
+        }
+      },
+      "TextualBaseMetricDescriptionDTO" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "scale" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "textDescription" : {
+            "type" : "string"
+          },
+          "dataType" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
