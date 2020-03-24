@@ -94,6 +94,7 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			description = "Creates a new Repository and returns infos about the Repository.",
 			responses = {
 					@ApiResponse(
+								responseCode = "200",
 								description = "The repository info", 
 								content = @Content(schema = @Schema(implementation = RepositoryInfoDTO.class))
 							),
@@ -120,12 +121,19 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 	@Produces("application/json")
 	@Consumes("application/json")
 	@Operation(
-				tags = {"repository"},
-				summary = "Get all availables Repositories.",
-				description = "Get a list of all available Respositories from the server."
+		tags = {"repository"},
+		summary = "Get all availables Repositories.",
+		description = "Get a list of all available Respositories from the server.",
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "Lists of Information about all the registered Repositories.",
+				content = @Content(array = @ArraySchema(schema = @Schema(implementation = RepositoryInfoDTO.class)))
 			)
+		}
+	)
 	@Path("/repositories")
-	public List<RepositoryInfoDTO> getAllRepositories() {
+	public Response getAllRepositories() {
 		EList<Repository> repos = repoService.getRepos().getAvailableRepositories();
 
 		List<RepositoryInfoDTO> result = new ArrayList<>();
@@ -133,7 +141,7 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			RepositoryInfoDTO dto = DTOMapper.getRepositoryInfoDTO(repository, repoService, "/edp2/meta");			
 			result.add(dto);
 		}
-		return result;
+		return Response.ok(result).build();
 	}
 
 	@POST
@@ -242,7 +250,9 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			)
 	@Path("/repository/{repoId}/experimentGroups/{id}")
 	public Response getExperimentGroupFromRepo(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId,
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("id") String expGrpId) {
 		
 		LocalDirectoryRepository repo = repoService.findRepositoryByApiId(repoId);
@@ -281,7 +291,9 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 		)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/measuringPoint")
 	public Response createMeasuringPoint(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId,
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId, 
 			@Parameter(description = "Properties of the MeasuringPoint that should be created.", required = true)
 			MeasuringPointDTO mpDTO) {
@@ -321,7 +333,9 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/measuringType")
 	public Response createMeasuringType(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId,
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId,
 			@Parameter(description = "Properties of the MeasuringType that should be created.", required = true)
 			MeasuringTypeDTO mtDTO) {
@@ -364,7 +378,9 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSetting")
 	public Response createExperimentSetting(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId,
 			@Parameter(description = "Properties of the ExperimentSetting that should be created.", required = true)
 			ExperimentSettingDTO newSetting) {
@@ -402,7 +418,9 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 		)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings")
 	public Response getExperimentSettings(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId) {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
@@ -445,8 +463,11 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 			)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}")
 	public Response getExperimentSetting(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId,
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId, 
+			@Parameter(description = "Id of the ExperimentSetting. Hex-encoded and in Guid format.", required = true)
 			@PathParam("settingId") String settingId) {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
@@ -488,8 +509,11 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 	)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRun")
 	public Response createExperimentRun(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String expGrpId, 
+			@Parameter(description = "Id of the ExperimentSetting. Hex-encoded and in Guid format.", required = true)
 			@PathParam("settingId") String settingId, 
 			@Parameter(description = "Properties of the ExperimentRun that should be created.", required = true)
 			ExperimentRunDTO newRun) {
@@ -530,8 +554,11 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 	)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns")
 	public Response getExperimentRuns(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String grpId, 
+			@Parameter(description = "Id of the ExperimentSetting. Hex-encoded and in Guid format.", required = true)
 			@PathParam("settingId") String settingId) {
 		
 		LocalDirectoryRepository localRepo = repoService.findRepositoryByApiId(repoId);
@@ -579,9 +606,13 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 	)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}")
 	public Response getExperimentRun(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String grpId,
+			@Parameter(description = "Id of the ExperimentSetting. Hex-encoded and in Guid format.", required = true)
 			@PathParam("settingId") String settingId,
+			@Parameter(description = "Id of the ExperimentRun. Hex-encoded and in Guid format.", required = true)
 			@PathParam("runId") String runId) {
 		
 		LocalDirectoryRepository repo = repoService.findRepositoryByApiId(repoId);
@@ -630,9 +661,13 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 	)
 	@Path("/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}/measurement")
 	public Response createMeasurement(
+			@Parameter(description = "Id of the repository. Hex-encoded and in Guid format.", required = true)
 			@PathParam("repoId") String repoId, 
+			@Parameter(description = "Id of the experiment Group. Hex-encoded and in Guid format.", required = true)
 			@PathParam("grpId") String grpId,
+			@Parameter(description = "Id of the ExperimentSetting. Hex-encoded and in Guid format.", required = true)
 			@PathParam("settingId") String settingId,
+			@Parameter(description = "Id of the ExperimentRun. Hex-encoded and in Guid format.", required = true)
 			@PathParam("runId") String runId,
 			@Parameter(description = "Model for the Measurement that should be created.", required = true)
 			MeasurementDTO mDto) {
@@ -685,7 +720,11 @@ public class RemoteEDP2Controller implements RemoteEDP2API {
 		}
 	)
 	@Path("/dataseries/double")
-	public Response addLongDataSeries(LongBinaryDataSeriesDTO dsDto) {
+	public Response addLongDataSeries(
+			@RequestBody(description = "Batch of measured data that should be stored on the remote EDP2 Server.", 
+				required = true, 
+				content = @Content(schema = @Schema(implementation = LongBinaryDataSeriesDTO.class)))
+			LongBinaryDataSeriesDTO dsDto) {
 		
 		Repository repo = repoService.findRepositoryByApiId(dsDto.getRepoId());
 		

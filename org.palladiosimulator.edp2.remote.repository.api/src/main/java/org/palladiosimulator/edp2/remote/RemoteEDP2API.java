@@ -29,7 +29,7 @@ public interface RemoteEDP2API {
 	@GET
 	@Produces("application/json")
 	@Path("/repositories")
-	public List<RepositoryInfoDTO> getAllRepositories();
+	public Response getAllRepositories();
 	
 	@GET
 	@Path("/repository/{repoId}/experimentGroups")
