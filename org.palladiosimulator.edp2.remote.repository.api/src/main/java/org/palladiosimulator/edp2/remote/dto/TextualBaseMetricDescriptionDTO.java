@@ -1,11 +1,40 @@
 package org.palladiosimulator.edp2.remote.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(
+		name="TextualBaseMetricDescription",
+		description="Representation of  a TextualBaseMetricDescription."
+	)
 public class TextualBaseMetricDescriptionDTO {
 
+	@Schema(
+			description = "Id of the TextualBaseMatricDescription. Hex-encoded and in guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String id;
+	
+	@Schema(
+			description = "Scale of the Base Metric.",
+			required = true
+		)
 	private String scale;
+	
+	@Schema(
+			description = "Name of the TextualBaseMetricDescription."
+		)
 	private String name;
+	
+	@Schema(
+			description = "Textual description of the Base Metric."
+		)
 	private String textDescription;
+	
+	@Schema(
+			description = "Datatype of the Base Metric.",
+			required = true
+		)
 	private String dataType;
 	
 	public String getId() {

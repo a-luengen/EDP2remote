@@ -1,13 +1,52 @@
 package org.palladiosimulator.edp2.remote.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(
+		name="LongBinaryDataSeries",
+		description="Representation of a batch of raw measured data of type long."
+	)
 public class LongBinaryDataSeriesDTO {
 
+	@Schema(
+			description = "Id of the Repository, the Data should be stored to. Hex-encoded and in Guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String repoId;
 	
+	@Schema(
+			description = "Id of the ExperimentGroup, the Data should be stored to. Hex-encoded and in Guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String grpId;
+	
+	@Schema(
+			description = "Id of the ExperimentSetting, the Data should be stored to. Hex-encoded and in Guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String settingId;
+	
+	@Schema(
+			description = "Id of the ExperimentRun, the Data should be stored to. Hex-encoded and in Guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String runId;
+	
+	@Schema(
+			description = "Id of the Measuremetn, the Data should be stored to. Hex-encoded and in Guid format.",
+			required = true,
+			format = "uuid"
+		)
 	private String measurementId;
+	
+	@Schema(
+			description = "Batch of Raw measured data of type long.",
+			required = true
+		)
 	private long[] values;
 
 	public String getRepoId() {

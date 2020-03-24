@@ -17,6 +17,22 @@ tags:
 - name: measuringPoint
   description: Methods for MeasuringPoint Resource.
 paths:
+  /meta/repositories:
+    get:
+      tags:
+      - repository
+      summary: Get all availables Repositories.
+      description: Get a list of all available Respositories from the server.
+      operationId: getAllRepositories
+      responses:
+        default:
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RepositoryInfo'
   /meta/repository:
     post:
       tags:
@@ -30,17 +46,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RepositoryInfoDTO'
+                $ref: '#/components/schemas/RepositoryInfo'
         500:
           description: Repository could not be created due to internal issues.
-  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}/measurement:
-    post:
+  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns:
+    get:
       tags:
-      - measurement
-      summary: Create new Measurement
-      description: Creates a new Measurement as specified in the Measurment-Model
-        in the Meta-Resources specified by their respective Ids.
-      operationId: createMeasurement
+      - experimentRun
+      summary: Get all ExperimentRuns of ExperimentSetting.
+      description: Get Infos for all available ExperimentRuns of the ExperimentSetting
+        in the ExperimentGroup and Repository with their respective Id.
+      operationId: getExperimentRuns
       parameters:
       - name: repoId
         in: path
@@ -57,63 +73,18 @@ paths:
         required: true
         schema:
           type: string
-      - name: runId
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Model for the Measurement that should be created.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MeasurementDTO'
-        required: true
       responses:
         200:
-          description: Returns info about the created Measurement.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MeasurementDTO'
-        404:
-          description: Repository, ExperimentGroup, ExperimentSetting or ExperimentRun
-            could not be found.
-  /meta/repositories:
-    get:
-      tags:
-      - repository
-      summary: Get all availables Repositories.
-      description: Get a list of all available Respositories from the server.
-      operationId: getAllRepositories
-      responses:
-        default:
-          description: default response
+          description: Returns an Array of infos for all available ExperimentRuns.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RepositoryInfoDTO'
-  /meta/dataseries/double:
-    post:
-      tags:
-      - dataseries
-      summary: Add DataSeries of type Long.
-      description: Add DataSeries to a Measurement containing values of type long.
-      operationId: addLongDataSeries
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LongBinaryDataSeriesDTO'
-      responses:
-        200:
-          description: Adds long type values to the DataSeries into the Meta-Object
-            hierarchy as specified in the DTO.
+                  $ref: '#/components/schemas/ExperimentRun'
         404:
-          description: Repository, ExperimentGroup, ExperimentSetting, ExperimentRun
-            or Measurement could not be found.
+          description: Repository, ExperimentGroup or ExperimentSetting with given
+            Id is not found.
   /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}:
     get:
       tags:
@@ -149,18 +120,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperimentRunDTO'
+                $ref: '#/components/schemas/ExperimentRun'
         404:
           description: Repository, ExperimentGroup, ExperimentSetting or ExperimentRun
             with respective Id is not found.
-  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns:
-    get:
+  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRuns/{runId}/measurement:
+    post:
       tags:
-      - experimentRun
-      summary: Get all ExperimentRuns of ExperimentSetting.
-      description: Get Infos for all available ExperimentRuns of the ExperimentSetting
-        in the ExperimentGroup and Repository with their respective Id.
-      operationId: getExperimentRuns
+      - measurement
+      summary: Create new Measurement
+      description: Creates a new Measurement as specified in the Measurment-Model
+        in the Meta-Resources specified by their respective Ids.
+      operationId: createMeasurement
       parameters:
       - name: repoId
         in: path
@@ -177,18 +148,28 @@ paths:
         required: true
         schema:
           type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Model for the Measurement that should be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Measurement'
+        required: true
       responses:
         200:
-          description: Returns an Array of infos for all available ExperimentRuns.
+          description: Returns info about the created Measurement.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExperimentRunDTO'
+                $ref: '#/components/schemas/Measurement'
         404:
-          description: Repository, ExperimentGroup or ExperimentSetting with given
-            Id is not found.
+          description: Repository, ExperimentGroup, ExperimentSetting or ExperimentRun
+            could not be found.
   /meta/repository/{id}/experimentGroup:
     post:
       tags:
@@ -215,11 +196,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperimentGroupDTO'
+                $ref: '#/components/schemas/ExperimentGroup'
         404:
           description: Repository not found.
         500:
           description: ExperimentGroup could not be created.
+  /meta/repository/{repoId}/experimentGroups/{id}:
+    get:
+      tags:
+      - experimentGroup
+      summary: Get ExperimentGroup from Repository
+      description: Get the representation of the ExperimentGroup with the given Id
+        of the Repository with the given Id.
+      operationId: getExperimentGroupFromRepo
+      parameters:
+      - name: repoId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Representation of the ExperimentGroup.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentGroup'
   /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}/experimentRun:
     post:
       tags:
@@ -249,7 +256,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExperimentRunDTO'
+              $ref: '#/components/schemas/ExperimentRun'
         required: true
       responses:
         200:
@@ -257,71 +264,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperimentRunDTO'
+                $ref: '#/components/schemas/ExperimentRun'
         404:
           description: Repository, ExperimentGroup of ExperimentSetting with the given
             Id was not found.
-  /meta/repository/{repoId}/experimentGroups/{id}:
-    get:
-      tags:
-      - experimentGroup
-      summary: Get ExperimentGroup from Repository
-      description: Get the representation of the ExperimentGroup with the given Id
-        of the Repository with the given Id.
-      operationId: getExperimentGroupFromRepo
-      parameters:
-      - name: repoId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Representation of the ExperimentGroup.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExperimentGroupDTO'
-  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSetting:
-    post:
-      tags:
-      - experimentSetting
-      summary: Create a ExperimentSetting.
-      description: Create a new ExperimentSetting in the ExperimentGroup and Repository
-        with their respective Id.
-      operationId: createExperimentSetting
-      parameters:
-      - name: repoId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: grpId
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Properties of the ExperimentSetting that should be created.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExperimentSettingDTO'
-        required: true
-      responses:
-        200:
-          description: ExperimentSetting created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExperimentSettingDTO'
-        404:
-          description: ExperimentGroup or Repository not found.
   /meta/repository/{id}/experimentGroups:
     get:
       tags:
@@ -344,7 +290,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ExperimentGroupDTO'
+                  $ref: '#/components/schemas/ExperimentGroup'
         404:
           description: Repository not found.
   /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings:
@@ -374,7 +320,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ExperimentSettingDTO'
+                  $ref: '#/components/schemas/ExperimentSetting'
         404:
           description: Repository or ExperimentGroup not found.
   /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSettings/{settingId}:
@@ -407,17 +353,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExperimentSettingDTO'
+                $ref: '#/components/schemas/ExperimentSetting'
         404:
           description: Repository, ExperimentGroup or ExperimentSetting not found.
-  /meta/repository/{repoId}/experimentGroups/{grpId}/measuringPoint:
+  /meta/repository/{repoId}/experimentGroups/{grpId}/experimentSetting:
     post:
       tags:
-      - measuringPoint
-      summary: Create new MeasuringPoint.
-      description: Creates a new MeasuringPoint in the ExperimentGroup with the given
-        Id as specified in the MeasuringPointDTO.
-      operationId: createMeasuringPoint
+      - experimentSetting
+      summary: Create a ExperimentSetting.
+      description: Create a new ExperimentSetting in the ExperimentGroup and Repository
+        with their respective Id.
+      operationId: createExperimentSetting
       parameters:
       - name: repoId
         in: path
@@ -430,21 +376,21 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Properties of the MeasuringPoint that should be created.
+        description: Properties of the ExperimentSetting that should be created.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeasuringPointDTO'
+              $ref: '#/components/schemas/ExperimentSetting'
         required: true
       responses:
         200:
-          description: Created MeasuringPoint
+          description: ExperimentSetting created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeasuringPointDTO'
+                $ref: '#/components/schemas/ExperimentSetting'
         404:
-          description: Repository or ExperimentGroup not found.
+          description: ExperimentGroup or Repository not found.
   /meta/repository/{repoId}/experimentGroups/{grpId}/measuringType:
     post:
       tags:
@@ -469,7 +415,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeasuringTypeDTO'
+              $ref: '#/components/schemas/MeasuringType'
         required: true
       responses:
         200:
@@ -477,132 +423,317 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeasuringTypeDTO'
+                $ref: '#/components/schemas/MeasuringType'
         404:
           description: ExperimentGroup or Repository not found.
+  /meta/repository/{repoId}/experimentGroups/{grpId}/measuringPoint:
+    post:
+      tags:
+      - measuringPoint
+      summary: Create new MeasuringPoint.
+      description: Creates a new MeasuringPoint in the ExperimentGroup with the given
+        Id as specified in the MeasuringPointDTO.
+      operationId: createMeasuringPoint
+      parameters:
+      - name: repoId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: grpId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Properties of the MeasuringPoint that should be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeasuringPoint'
+        required: true
+      responses:
+        200:
+          description: Created MeasuringPoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasuringPoint'
+        404:
+          description: Repository or ExperimentGroup not found.
+  /meta/dataseries/double:
+    post:
+      tags:
+      - dataseries
+      summary: Add DataSeries of type Long.
+      description: Add DataSeries to a Measurement containing values of type long.
+      operationId: addLongDataSeries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LongBinaryDataSeries'
+      responses:
+        200:
+          description: Adds long type values to the DataSeries into the Meta-Object
+            hierarchy as specified in the DTO.
+        404:
+          description: Repository, ExperimentGroup, ExperimentSetting, ExperimentRun
+            or Measurement could not be found.
 components:
   schemas:
-    RepositoryInfoDTO:
+    RepositoryInfo:
+      required:
+      - id
       type: object
       properties:
         name:
           type: string
+          description: Name of the Repository the information belongs to.
         id:
           type: string
+          description: Id of the Repository. Hex-encoded and in Guid format.
+          format: uuid
         experimentGroupIds:
           type: array
+          description: References to the ExperimentGroups the Repository contains.
+            Hex-encoded and in Guid format.
           items:
             type: string
-    MeasurementDTO:
+            description: References to the ExperimentGroups the Repository contains.
+              Hex-encoded and in Guid format.
+      description: Basic information about a repository. Contains its name and references
+        to all its registerd ExperimentGroups.
+    ExperimentRun:
+      required:
+      - duration
+      - id
+      - measurements
+      - startTime
       type: object
       properties:
         id:
           type: string
-        runId:
-          type: string
-        endTime:
-          type: integer
-          format: int64
-        startTime:
-          type: integer
-          format: int64
-        measuringTypeId:
-          type: string
-    LongBinaryDataSeriesDTO:
-      type: object
-      properties:
-        repoId:
-          type: string
-        grpId:
-          type: string
-        settingId:
-          type: string
-        runId:
-          type: string
-        measurementId:
-          type: string
-        values:
-          type: array
-          items:
-            type: integer
-            format: int64
-    ExperimentRunDTO:
-      type: object
-      properties:
-        id:
-          type: string
+          description: Id of the ExperimentRun. Hex-encoded and in Guid format.
+          format: uuid
         duration:
           type: integer
+          description: Duration of the Experiment Run.
           format: int64
         startTime:
           type: string
+          description: Start time of the Experiment Run.
           format: date-time
         measurements:
           type: array
+          description: References to the Measurements of this Experiment Run.
           items:
-            $ref: '#/components/schemas/MeasurementDTO'
-    ExperimentGroupDTO:
+            $ref: '#/components/schemas/Measurement'
+      description: Representation of a single Run of an Experiment. Contains representation
+        of all measurements during the run.
+    Measurement:
+      required:
+      - endTime
+      - id
+      - measuringTypeId
+      - runId
+      - startTime
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the Measurement. Hex-encoded and in Guid format.
+          format: uuid
+        runId:
+          type: string
+          description: Id of the ExperimentRun, this measurement belongs to. Hex-encoded
+            and in Guid format.
+          format: uuid
+        endTime:
+          type: integer
+          description: Time stamp at the end of the Measurement.
+          format: int64
+        startTime:
+          type: integer
+          description: Time stamp at start of the Measurement.
+          format: int64
+        measuringTypeId:
+          type: string
+          description: Id of the Type of this Measurement. Hex-encoded and in Guid
+            format.
+      description: Representaiton of a single Measurement. Contains reference to its
+        measuringType and the experimentRun, it belongs to.
+    ExperimentGroup:
+      required:
+      - uuid
       type: object
       properties:
         uuid:
           type: string
+          description: Id of the ExperimentGroup. Hex-Encoded and in Guid format.
+          format: uuid
         purpose:
           type: string
+          description: Optional purpose of this ExperimentGroup.
         measuringpointRepositoryIDs:
           type: array
+          description: References to the MeasuringPointRepositories belonging to this
+            group.
+          format: uuid
           items:
             type: string
+            description: References to the MeasuringPointRepositories belonging to
+              this group.
+            format: uuid
         measuringTypeIDs:
           type: array
+          description: References to the MeasuringTypes belonging to this group.
+          format: uuid
           items:
             type: string
+            description: References to the MeasuringTypes belonging to this group.
+            format: uuid
         experimentSettingIDs:
           type: array
+          description: References to the ExperimentSettings belongign to this group.
+          format: uuid
           items:
             type: string
-    ExperimentSettingDTO:
+            description: References to the ExperimentSettings belongign to this group.
+            format: uuid
+      description: Representation of a Group of several Experiments. Contains references
+        to its MeasuringpointRepository, its MeasuringTypes and Setting of the Experiments.
+    ExperimentSetting:
+      required:
+      - id
       type: object
       properties:
         description:
           type: string
+          description: Textual description of the Experiments Setting.
         id:
           type: string
+          description: Id of the ExperimentSetting. Hex-encoded and in Guid format.
+          format: uuid
         groupId:
           type: string
+          description: Id of the Group the ExperimentSetting belongs to. Hex-encoded
+            and in Guid format.
+          format: uuid
         experimentRunIds:
           type: array
+          description: References to the ExperimentRuns using this Setting.
           items:
             type: string
+            description: References to the ExperimentRuns using this Setting.
         measuringTypeIds:
           type: array
+          description: Referneces to the MeasuringTypes used in this Setting.
           items:
             type: string
-    MeasuringPointDTO:
+            description: Referneces to the MeasuringTypes used in this Setting.
+      description: Representation of a single setting of an experiment. Contains references
+        to the experimentRuns and to MeasuringTypes used by the experiments.
+    MeasuringType:
+      required:
+      - experimentGroupId
+      - id
+      - measuringPointStringRepresentation
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the MeasuringType. Hex-encoded and in Guid-format.
+          format: uuid
+        experimentGroupId:
+          type: string
+          description: Id of the ExperimentGroup the MeasuringType belongs to. Hex-encoded
+            and in Guid-format.
+          format: uuid
+        measuringPointStringRepresentation:
+          type: string
+          description: Textual representation of the MeasuringPoint. Used to find
+            correct Reference.
+        textualBaseMetricDescription:
+          $ref: '#/components/schemas/TextualBaseMetricDescription'
+      description: Representation of a MeasuringType. Contains references to the experimentGroup
+        it belongs to. In addition it contains the string representation of the MeasuringPoint
+        and the MetricDescription.
+    TextualBaseMetricDescription:
+      required:
+      - dataType
+      - id
+      - scale
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the TextualBaseMatricDescription. Hex-encoded and in
+            guid format.
+          format: uuid
+        scale:
+          type: string
+          description: Scale of the Base Metric.
+        name:
+          type: string
+          description: Name of the TextualBaseMetricDescription.
+        textDescription:
+          type: string
+          description: Textual description of the Base Metric.
+        dataType:
+          type: string
+          description: Datatype of the Base Metric.
+      description: Representation of  a TextualBaseMetricDescription.
+    MeasuringPoint:
+      required:
+      - measuringPointDescription
       type: object
       properties:
         measuringPointDescription:
           type: string
-    MeasuringTypeDTO:
+          description: Textual description of the MeasuringPoint.
+      description: Representation of a MeasuringPoint, currently limited to StringMeasuringPoint
+        only. Contains the description of the MeasuringPoint as string.
+    LongBinaryDataSeries:
+      required:
+      - grpId
+      - measurementId
+      - repoId
+      - runId
+      - settingId
+      - values
       type: object
       properties:
-        id:
+        repoId:
           type: string
-        experimentGroupId:
+          description: Id of the Repository, the Data should be stored to. Hex-encoded
+            and in Guid format.
+          format: uuid
+        grpId:
           type: string
-        measuringPointStringRepresentation:
+          description: Id of the ExperimentGroup, the Data should be stored to. Hex-encoded
+            and in Guid format.
+          format: uuid
+        settingId:
           type: string
-        textualBaseMetricDescription:
-          $ref: '#/components/schemas/TextualBaseMetricDescriptionDTO'
-    TextualBaseMetricDescriptionDTO:
-      type: object
-      properties:
-        id:
+          description: Id of the ExperimentSetting, the Data should be stored to.
+            Hex-encoded and in Guid format.
+          format: uuid
+        runId:
           type: string
-        scale:
+          description: Id of the ExperimentRun, the Data should be stored to. Hex-encoded
+            and in Guid format.
+          format: uuid
+        measurementId:
           type: string
-        name:
-          type: string
-        textDescription:
-          type: string
-        dataType:
-          type: string
+          description: Id of the Measuremetn, the Data should be stored to. Hex-encoded
+            and in Guid format.
+          format: uuid
+        values:
+          type: array
+          description: Batch of Raw measured data of type long.
+          items:
+            type: integer
+            description: Batch of Raw measured data of type long.
+            format: int64
+      description: Representation of a batch of raw measured data of type long.
